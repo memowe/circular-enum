@@ -3,9 +3,15 @@
 **Circular successor & predecessor for bounded enum types**
 
 [![Build and test][test-badge]][test]
+[![Publish API docs][haddock-badge]][haddock]
+[![API docs][api-docs-badge]][api-docs]
 
 [test-badge]: https://github.com/memowe/circular-enum/actions/workflows/test.yml/badge.svg
 [test]: https://github.com/memowe/circular-enum/actions/workflows/test.yml
+[haddock-badge]: https://github.com/memowe/circular-enum/actions/workflows/haddock-pages.yml/badge.svg
+[haddock]: https://github.com/memowe/circular-enum/actions/workflows/haddock-pages.yml
+[api-docs-badge]: https://img.shields.io/badge/Haddock-Documentation-8a80a8?style=flat&logo=haskell&logoColor=lightgray
+[api-docs]: https://mirko.westermeier.de/circular-enum/Data-Enum-Circular.html
 
 ```haskell
 import Data.Enum.Circular (csucc, cpred)

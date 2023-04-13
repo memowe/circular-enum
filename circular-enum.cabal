@@ -1,6 +1,7 @@
 cabal-version:    3.0
 name:             circular-enum
 version:          0.1.0.0
+synopsis:         Circular successor & predecessor for bounded enum types
 homepage:         https://github.com/memowe/circular-enum
 license:          MIT
 license-file:     LICENSE
