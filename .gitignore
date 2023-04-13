@@ -1,0 +1,5 @@
+# Cabal build directory
+dist-newstyle
+
+# Vim swap files
+*.sw?
