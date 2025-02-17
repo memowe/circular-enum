@@ -1,7 +1,7 @@
 {-|
 Module      : Data.Enum.Circular
 Description : Circular successor & predecessor for bounded enum types
-Copyright   : (c) 2023 Mirko Westermeier
+Copyright   : (c) 2023-2025 Mirko Westermeier
 License     : MIT
 
 Sometimes, bounded enum types should be circular. Consider this enum

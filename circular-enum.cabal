@@ -9,7 +9,7 @@ license:          MIT
 license-file:     LICENSE
 author:           Mirko Westermeier
 maintainer:       mirko@westermeier.de
-copyright:        (c) 2023 Mirko Westermeier
+copyright:        (c) 2023-2025 Mirko Westermeier
 category:         Data
 build-type:       Simple
 extra-doc-files:  CHANGELOG.md

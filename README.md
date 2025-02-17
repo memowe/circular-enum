@@ -35,7 +35,7 @@ show $ take 6 (iterate csucc N)
 
 ## Author and License
 
-Copyright (c) 2023 Mirko Westermeier ([@memowe][memowe-gh])
+Copyright (c) 2023-2025 Mirko Westermeier ([@memowe][memowe-gh])
 
 Released under the MIT license. See [LICENSE](LICENSE) for details.
 
