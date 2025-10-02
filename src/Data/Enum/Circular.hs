@@ -25,7 +25,7 @@ the functions defined in this module act like circular versions of 'succ'
 and 'pred'.
 -}
 
-module Data.Enum.Circular (csucc, cpred) where
+module Data.Enum.Circular (csucc, cpred, Circular(..)) where
 
 -- | Circular version of 'succ'
 csucc :: (Eq a, Enum a, Bounded a) => a -> a
@@ -54,8 +54,8 @@ instance (Bounded a, Eq a, Enum a) => Enum (Circular a) where
 
   toEnum :: Int -> Circular a
   toEnum index = let
-    enumSize = fromEnum $ maxBound @(Circular a)
-    truncatedIndex = index `mod` enumSize
+    maxBoundIndex = fromEnum $ maxBound @(Circular a) -- relies on the fact that toEnum starts at zero
+    truncatedIndex = index `mod` (maxBoundIndex + 1)
     in Circular (toEnum truncatedIndex)
 
   fromEnum :: Circular a -> Int
@@ -73,9 +73,9 @@ instance (Bounded a, Eq a, Enum a) => Enum (Circular a) where
     in stepList lowerIndex
 
   enumFromTo :: (Bounded a, Eq a, Enum a) => Circular a -> Circular a -> [Circular a]
-  enumFromTo current target = if current == target
+  enumFromTo current target = current : if current == target
     then []
-    else current : enumFromTo (succ current) target
+    else enumFromTo (succ current) target
 
   enumFromThenTo :: (Bounded a, Eq a, Enum a) => Circular a -> Circular a -> Circular a -> [Circular a]
   enumFromThenTo lower higher target = let
