@@ -61,6 +61,9 @@ instance (Bounded a, Eq a, Enum a) => Enum (Circular a) where
   fromEnum :: Circular a -> Int
   fromEnum (Circular inner) = fromEnum inner
 
+  enumFrom :: Circular a -> [Circular a]
+  enumFrom start = cycle $ enumFromTo start (pred start)
+
   enumFromThen :: (Bounded a, Eq a, Enum a) => Circular a -> Circular a -> [Circular a]
   enumFromThen lower higher = let
     lowerIndex = fromEnum lower

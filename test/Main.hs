@@ -66,6 +66,9 @@ circularNewtype = describe "Circular newtype" $ do
       $ enumFromThenTo (Circular N) (Circular S) (Circular E) `startShouldBe` cycle (fmap Circular [N, S])
       -- produces an infinite list because 'E' can never be reached
 
+    it "enumFrom infinity"
+      $ enumFrom (Circular E) `startShouldBe` cycle (fmap Circular [E, S, W, N])
+
 main :: IO ()
 main = hspec $ do
   circularDirections
