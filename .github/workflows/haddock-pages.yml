@@ -9,7 +9,7 @@ env:
 jobs:
 
   haddock:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
 
     - name: Set up haskell
@@ -33,12 +33,13 @@ jobs:
     - name: Store generated API docs
       uses: actions/upload-pages-artifact@v3
       with:
+        name: Haddock API docs
         path: ${{ env.HADDOCK_DIR }}
 
   deploy:
     needs: haddock
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
