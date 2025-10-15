@@ -1,44 +1,56 @@
-name: Publish API docs
+name: Test and Publish API docs
 
 on: [push, pull_request, workflow_dispatch]
 
 env:
   HADDOCK_DIR: haddock-html
+  HADDOCK_BUILD_DIR: haddock_build
   PAGES_DIR: gh-pages
 
 jobs:
 
-  haddock:
+  build_test_doc:
+    name: Build, Test, API docs
     runs-on: ubuntu-latest
     steps:
-
-    - name: Set up haskell
-      uses: haskell-actions/setup@v2
-      with:
-        ghc-version: '9.2.7'
-        cabal-version: '3.6.2.0'
 
     - name: Checkout repository content
       uses: actions/checkout@v4
 
+    - name: Set up Haskell
+      uses: haskell-actions/setup@v2
+      id: setup
+      with:
+        ghc-version: '9.2.7'
+        cabal-version: '3.6.2.0'
+
+    - name: Configure the build
+      # generates dist-newstyle/cache/plan.json
+      run: |
+        cabal configure --enable-tests --enable-benchmarks
+        cabal build all --dry-run 
+
     - name: Configure cache
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.cabal/packages
-          ~/.cabal/store
-          dist-newstyle
-        key: cabal-${{ hashFiles('**/*.cabal', '**/*.cabal.project', '**/*.cabal.project.freeze') }}
+        path: ${{ steps.setup.outputs.cabal-store }}
+        key: cabal-${{ hashFiles('**/plan.json') }}
         restore-keys: cabal-
 
-    - name: Prepare cabal
-      run: cabal update
+    - name: Install dependencies
+      run: cabal build --only-dependencies all
+
+    - name: Build project
+      run: cabal build all
+
+    - name: Run tests
+      run: cabal test --test-show-details=streaming all
 
     - name: Generate haddock API docs
-      run: cabal haddock --builddir=haddock_build --haddock-hyperlinked-source --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs'
+      run: cabal haddock --builddir=$HADDOCK_BUILD_DIR --haddock-hyperlinked-source --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs'
 
     - name: Find generated HTML
-      run: mv $(find haddock_build -wholename '*doc/html/circular-enum' | head -n 1) $HADDOCK_DIR
+      run: mv $(find $HADDOCK_BUILD_DIR -wholename '*doc/html/circular-enum' | head -n 1) $HADDOCK_DIR
 
     - name: Store generated API docs
       uses: actions/upload-artifact@v4
@@ -52,7 +64,8 @@ jobs:
         path: ${{ env.HADDOCK_DIR }}
 
   deploy:
-    needs: haddock
+    name: Deploy API docs
+    needs: build_test_doc
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
