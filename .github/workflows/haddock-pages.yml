@@ -41,9 +41,14 @@ jobs:
       run: mv $(find haddock_build -wholename '*doc/html/circular-enum' | head -n 1) $HADDOCK_DIR
 
     - name: Store generated API docs
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Haddock API docs
+        path: ${{ env.HADDOCK_DIR }}
+
+    - name: Prepare API docs for pages deployment
+      uses: actions/upload-pages-artifact@v3
+      with:
         path: ${{ env.HADDOCK_DIR }}
 
   deploy:
