@@ -45,7 +45,7 @@ cpred x | x == minBound = maxBound
 newtype Circular a = Circular a
   deriving (Show, Eq, Ord, Bounded)
 
-instance (Bounded a, Eq a, Enum a) => Enum (Circular a) where
+instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
   succ :: Circular a -> Circular a
   succ (Circular inner) = Circular $ csucc inner
 
@@ -64,7 +64,7 @@ instance (Bounded a, Eq a, Enum a) => Enum (Circular a) where
   enumFrom :: Circular a -> [Circular a]
   enumFrom start = cycle $ enumFromTo start (pred start)
 
-  enumFromThen :: (Bounded a, Eq a, Enum a) => Circular a -> Circular a -> [Circular a]
+  enumFromThen :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
   enumFromThen lower higher = let
     lowerIndex = fromEnum lower
     higherIndex = fromEnum higher
@@ -75,12 +75,12 @@ instance (Bounded a, Eq a, Enum a) => Enum (Circular a) where
       in current : stepList nextIndex
     in stepList lowerIndex
 
-  enumFromTo :: (Bounded a, Eq a, Enum a) => Circular a -> Circular a -> [Circular a]
+  enumFromTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
   enumFromTo current target = current : if current == target
     then []
     else enumFromTo (succ current) target
 
-  enumFromThenTo :: (Bounded a, Eq a, Enum a) => Circular a -> Circular a -> Circular a -> [Circular a]
+  enumFromThenTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> Circular a -> [Circular a]
   enumFromThenTo lower higher target = let
     lowerIndex = fromEnum lower
     higherIndex = fromEnum higher
