@@ -29,28 +29,28 @@ module Data.Enum.Circular (csucc, cpred, Circular(..)) where
 
 -- | Circular version of 'succ'
 csucc :: (Eq a, Enum a, Bounded a) => a -> a
-csucc x | x == maxBound = minBound
-        | otherwise     = succ x
+csucc = unCircular . succ . Circular
 
 -- | Circular version of 'pred'
 cpred :: (Eq a, Enum a, Bounded a) => a -> a
-cpred x | x == minBound = maxBound
-        | otherwise     = pred x
+cpred = unCircular . pred . Circular
 
 
 -- | Type Alias you can use to express your intent and avoid 'Enum' functions from biting you.
 --
 -- Beware: this alters the behaviour of some functions, producing infinite lists (because of circularity)
 
-newtype Circular a = Circular a
+newtype Circular a = Circular {unCircular :: a}
   deriving (Show, Eq, Ord, Bounded)
 
 instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
   succ :: Circular a -> Circular a
-  succ (Circular inner) = Circular $ csucc inner
+  succ (Circular x) | x == maxBound = minBound
+                    | otherwise     = Circular (succ x)
 
   pred :: Circular a -> Circular a
-  pred (Circular inner) = Circular $ cpred inner
+  pred (Circular x) | x == minBound = maxBound
+                    | otherwise     = Circular (pred x)
 
   toEnum :: Int -> Circular a
   toEnum index = let
