@@ -1,5 +1,4 @@
 {-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-|
 Module      : Data.Enum.Circular
@@ -41,20 +40,20 @@ cpred = unCircular . pred . Circular
 -- Beware: this alters the behaviour of some functions, producing infinite lists (because of circularity)
 
 newtype Circular a = Circular {unCircular :: a}
-  deriving (Show, Eq, Ord, Bounded)
+  deriving (Show, Eq, Ord)
 
 instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
   succ :: Circular a -> Circular a
-  succ (Circular x) | x == maxBound = minBound
+  succ (Circular x) | x == maxBound = Circular minBound
                     | otherwise     = Circular (succ x)
 
   pred :: Circular a -> Circular a
-  pred (Circular x) | x == minBound = maxBound
+  pred (Circular x) | x == minBound = Circular maxBound
                     | otherwise     = Circular (pred x)
 
   toEnum :: Int -> Circular a
   toEnum index = let
-    maxBoundIndex = fromEnum $ maxBound @(Circular a) -- relies on the fact that toEnum starts at zero
+    maxBoundIndex = fromEnum (maxBound :: a) -- relies on the fact that toEnum starts at zero
     truncatedIndex = index `mod` (maxBoundIndex + 1)
     in Circular (toEnum truncatedIndex)
 

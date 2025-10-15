@@ -35,14 +35,14 @@ circularNewtype = describe "Circular newtype" $ do
 
   describe "Boundaries" $ do
     it "North after West" 
-      $ csucc (Circular W) `shouldBe` Circular N
+      $ succ (Circular W) `shouldBe` Circular N
 
   describe "Compatible with inner Enum instance" $ do
     it "Successors" 
-      $ iterate succ minBound `startShouldBe` fmap Circular (cycle allDirs)
+      $ iterate succ (Circular minBound) `startShouldBe` fmap Circular (cycle allDirs)
 
     it "Predecessors"
-      $ iterate pred maxBound `startShouldBe` fmap Circular (cycle $ reverse allDirs)
+      $ iterate pred (Circular maxBound) `startShouldBe` fmap Circular (cycle $ reverse allDirs)
 
   describe "Out of Bounds" $ do
     it "fromEnum Boundary"
