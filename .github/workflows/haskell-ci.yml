@@ -10,19 +10,29 @@ env:
 jobs:
 
   build_test_doc:
-    name: Build, Test, API docs
-    runs-on: ubuntu-latest
+    name: Test & Docs (${{ matrix.ghc-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ghc-version: ['9.2', '9.4', '9.6', '9.8', '9.10', '9.12']
+        include:
+          - os: windows-latest
+            ghc-version: '9.6'
+          - os: macos-latest
+            ghc-version: '9.6'
+
     steps:
 
     - name: Checkout repository content
       uses: actions/checkout@v4
 
-    - name: Set up Haskell
+    - name: Set up GHC ${{ matrix.ghc-version }}
       uses: haskell-actions/setup@v2
       id: setup
       with:
-        ghc-version: '9.2.7'
-        cabal-version: '3.6.2.0'
+        ghc-version: ${{ matrix.ghc-version }}
 
     - name: Configure the build
       # generates dist-newstyle/cache/plan.json
@@ -32,10 +42,12 @@ jobs:
 
     - name: Configure cache
       uses: actions/cache@v4
+      env:
+        key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-${{ steps.setup.outputs.cabal-version }}
       with:
         path: ${{ steps.setup.outputs.cabal-store }}
-        key: cabal-${{ hashFiles('**/plan.json') }}
-        restore-keys: cabal-
+        key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
+        restore-keys: ${{ env.key }}-plan-
 
     - name: Install dependencies
       run: cabal build --only-dependencies all
@@ -47,18 +59,22 @@ jobs:
       run: cabal test --test-show-details=streaming all
 
     - name: Generate haddock API docs
+      if: matrix.os == 'ubuntu-latest' && matrix.ghc-version == '9.6'
       run: cabal haddock --builddir=$HADDOCK_BUILD_DIR --haddock-hyperlinked-source --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs'
 
     - name: Find generated HTML
+      if: matrix.os == 'ubuntu-latest' && matrix.ghc-version == '9.6'
       run: mv $(find $HADDOCK_BUILD_DIR -wholename '*doc/html/circular-enum' | head -n 1) $HADDOCK_DIR
 
     - name: Store generated API docs
+      if: matrix.os == 'ubuntu-latest' && matrix.ghc-version == '9.6'
       uses: actions/upload-artifact@v4
       with:
         name: Haddock API docs
         path: ${{ env.HADDOCK_DIR }}
 
     - name: Prepare API docs for pages deployment
+      if: matrix.os == 'ubuntu-latest' && matrix.ghc-version == '9.6'
       uses: actions/upload-pages-artifact@v3
       with:
         path: ${{ env.HADDOCK_DIR }}
