@@ -50,16 +50,14 @@ instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
                     | otherwise     = Circular (pred x)
 
   toEnum :: Int -> Circular a
-  toEnum index = let
-    maxBoundIndex = fromEnum (maxBound :: a) -- relies on the fact that toEnum starts at zero
-    truncatedIndex = index `mod` (maxBoundIndex + 1)
-    in Circular (toEnum truncatedIndex)
+  toEnum = Circular . toEnum . (`mod` len)
+    where len = fromEnum (maxBound :: a) + 1
 
   fromEnum :: Circular a -> Int
-  fromEnum (Circular inner) = fromEnum inner
+  fromEnum = fromEnum . unCircular
 
   enumFrom :: Circular a -> [Circular a]
-  enumFrom start = cycle $ enumFromTo start (pred start)
+  enumFrom = enumFromThen <*> succ
 
   enumFromThen :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
   enumFromThen lower higher = let
