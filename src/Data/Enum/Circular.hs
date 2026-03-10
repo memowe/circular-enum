@@ -43,7 +43,7 @@ cpred = unCircular . pred . Circular
 --    Use 'pred' or 'cpred' explicitly with 'iterate' to go backwards.
 
 newtype Circular a = Circular {unCircular :: a}
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq)
 
 instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
   succ :: Circular a -> Circular a
