@@ -2,6 +2,7 @@ module Main (main) where
 
 import Data.Enum.Circular
 import Data.Function
+import Data.List
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
@@ -117,9 +118,9 @@ main = hspec $ do
           prop "Start = next -> infinite" $ \cd target -> cd /= target ==>
             enumFromThenTo cd cd target
               `startShouldBe` repeat (cd :: Circular Dir)
-          prop "Prefix of enumFromThen" $ \cd cd' target ->
+          prop "Prefix of enumFromThen" $ \cd cd' target -> cd /= cd' ==>
             enumFromThenTo cd cd' target
-              `shouldStartWith` enumFromThen cd (cd' :: Circular Dir)
+              `isPrefixOf` enumFromThen cd (cd' :: Circular Dir)
 
         describe "enumFromTo: enumFromThenTo with succ" $ do
           prop "Same list" $ \cd target ->
