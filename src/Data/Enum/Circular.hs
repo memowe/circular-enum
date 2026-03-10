@@ -68,16 +68,21 @@ instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
   enumFromTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
   enumFromTo start end = takeWhile (/= end) (enumFrom start) ++ [end]
 
+  --  | Beware: unlike regular 'Enum' types, backwards enumeration via
+  --    @[West, South ..]@ leads to singleton results. Since the enum is
+  --    circular, a "backwards" step is equivalent to a large forwards step,
+  --    but the enumeration ends at the "to" element earlier than expected.
+  --    Use 'pred' or 'cpred' explicitly with 'iterate' to go backwards.
   enumFromThenTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> Circular a -> [Circular a]
-  enumFromThenTo lower higher target = let
-    lowerIndex = fromEnum lower
-    higherIndex = fromEnum higher
-    stepSize = abs $ higherIndex - lowerIndex -- absolute step size: wraps around
-    stepListTo i = let
-      current = toEnum i
-      nextIndex = fromEnum current + stepSize
-      in if current == target
-        then []
-        else current : stepListTo nextIndex
-    in stepListTo lowerIndex
-
+  enumFromThenTo from next to
+    | from == to    = [to]
+    | from == next  = repeat from
+    | otherwise     = from : go from (succ from)
+    where go x y
+            | y == goNext x &&  y == to = [to]
+            | y == goNext x             = y : go y (succ y)
+            |                   y == to = []
+            | otherwise                 = go x (succ y)
+          len     = fromEnum (maxBound :: a) - fromEnum (minBound :: a) + 1
+          step    = (fromEnum next - fromEnum from) `mod` len
+          goNext  = (!! step) . iterate succ

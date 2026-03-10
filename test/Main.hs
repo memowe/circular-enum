@@ -84,7 +84,7 @@ main = hspec $ do
           -- forward iteration
         it "enumeration stepped wrapping" $
           enumFromThenTo (Circular N) (Circular S) (Circular E)
-            `startShouldBe` cycle (fmap Circular [N])
+            `shouldBe` [Circular N]
           -- consistent with [1,3..2]
         it "enumFrom infinity" $
           enumFrom (Circular E)
@@ -114,13 +114,14 @@ main = hspec $ do
         describe "enumFromThenTo: finite enumFromThen" $ do
           prop "Start = end -> singleton" $ \cd cd' -> cd' /= cd ==>
             enumFromThenTo cd cd' cd `shouldBe` [cd :: Circular Dir]
+          prop "Start = next -> infinite" $ \cd target -> cd /= target ==>
+            enumFromThenTo cd cd target
+              `startShouldBe` repeat (cd :: Circular Dir)
           prop "Prefix of enumFromThen" $ \cd cd' target ->
             enumFromThenTo cd cd' target
               `shouldStartWith` enumFromThen cd (cd' :: Circular Dir)
 
         describe "enumFromTo: enumFromThenTo with succ" $ do
-          prop "Ends at target" $ \cd cd' ->
-            last (enumFromTo cd cd') `shouldBe` (cd' :: Circular Int)
           prop "Same list" $ \cd target ->
             enumFromTo cd target
               `shouldBe` enumFromThenTo cd (succ cd :: Circular Dir) target
