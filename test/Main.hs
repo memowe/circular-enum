@@ -56,7 +56,7 @@ main = hspec $ do
       prop "Predecessors" $ \dir -> dir /= (minBound :: Dir) ==>
         pred (Circular dir) `shouldBe` Circular (pred dir)
 
-    describe "Out of Bounds" $ do
+    describe "to/fromEnum" $ do
       let len = length allDirs
       it "Upper example" $
         toEnum 4 `shouldBe` Circular N
@@ -72,6 +72,11 @@ main = hspec $ do
         let toEnums   = toEnum <$> [0..]
             cAllDirs  = Circular <$> cycle allDirs
         in  toEnums !! n `shouldBe` cAllDirs !! n
+      prop "Roundtrip toEnum . fromEnum" $ \cd ->
+        toEnum (fromEnum cd) `shouldBe` (cd :: Circular Dir)
+      prop "'Roundtrip' fromEnum . toEnum . fromEnum" $ \cd ->
+        let i = fromEnum (cd :: Circular Dir)
+        in  fromEnum (toEnum i :: Circular Dir) `shouldBe` i
 
     describe "enum[From][Then][To] circularity" $ do
 
@@ -98,6 +103,8 @@ main = hspec $ do
             head (enumFromThen cd cd') `shouldBe` (cd :: Circular Dir)
           prop "Correct start of enumFromThen: second" $ \cd cd' ->
             enumFromThen cd cd' !! 1 `shouldBe` (cd' :: Circular Dir)
+          prop "Start = next -> infinite" $ \cd ->
+            enumFromThen cd cd `startShouldBe` repeat (cd :: Circular Dir)
           prop "Correct step size of enumFromThen" $ \cd n -> n /= 0 ==>
             let cd' = toEnum (fromEnum (cd :: Circular Dir) + n)
                 ds  = enumFromThen cd cd'
