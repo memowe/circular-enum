@@ -60,15 +60,10 @@ instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
   enumFrom = enumFromThen <*> succ
 
   enumFromThen :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
-  enumFromThen lower higher = let
-    lowerIndex = fromEnum lower
-    higherIndex = fromEnum higher
-    stepSize = abs $ higherIndex - lowerIndex -- absolute step size: wraps around
-    stepList i = let
-      current   = toEnum i
-      nextIndex = fromEnum current + stepSize
-      in current : stepList nextIndex
-    in stepList lowerIndex
+  enumFromThen from next = iterate goNext from
+    where len     = fromEnum (maxBound :: a) - fromEnum (minBound :: a) + 1
+          step    = (fromEnum next - fromEnum from) `mod` len
+          goNext  = (!! step) . iterate succ
 
   enumFromTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
   enumFromTo current target = current : if current == target
