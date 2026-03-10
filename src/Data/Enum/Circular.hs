@@ -56,7 +56,7 @@ instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
 
   toEnum :: Int -> Circular a
   toEnum = Circular . toEnum . (`mod` len)
-    where len = fromEnum (maxBound :: a) + 1
+    where len = fromEnum (maxBound :: a) - fromEnum (minBound :: a) + 1
 
   fromEnum :: Circular a -> Int
   fromEnum = fromEnum . unCircular
