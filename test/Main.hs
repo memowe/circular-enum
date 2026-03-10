@@ -84,8 +84,8 @@ main = hspec $ do
           -- forward iteration
         it "enumeration stepped wrapping" $
           enumFromThenTo (Circular N) (Circular S) (Circular E)
-            `startShouldBe` cycle (fmap Circular [N, S])
-          -- produces an infinite list because 'E' can never be reached
+            `startShouldBe` cycle (fmap Circular [N])
+          -- consistent with [1,3..2]
         it "enumFrom infinity" $
           enumFrom (Circular E)
             `startShouldBe` cycle (fmap Circular [E, S, W, N])
