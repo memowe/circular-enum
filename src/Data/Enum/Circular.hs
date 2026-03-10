@@ -33,9 +33,14 @@ cpred :: (Eq a, Enum a, Bounded a) => a -> a
 cpred = unCircular . pred . Circular
 
 
--- | Type Alias you can use to express your intent and avoid 'Enum' functions from biting you.
+--  | Type Alias you can use to express your intent and avoid 'Enum'
+--    functions from biting you.
 --
--- Beware: this alters the behaviour of some functions, producing infinite lists (because of circularity)
+--    Beware: unlike regular 'Enum' types, backwards enumeration via
+--    @[West, South ..]@ leads to singleton results. Since the enum is
+--    circular, a "backwards" step is equivalent to a large forwards step,
+--    but the enumeration ends at the "to" element earlier than expected.
+--    Use 'pred' or 'cpred' explicitly with 'iterate' to go backwards.
 
 newtype Circular a = Circular {unCircular :: a}
   deriving (Show, Eq, Ord)
@@ -68,11 +73,6 @@ instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
   enumFromTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
   enumFromTo start end = takeWhile (/= end) (enumFrom start) ++ [end]
 
-  --  | Beware: unlike regular 'Enum' types, backwards enumeration via
-  --    @[West, South ..]@ leads to singleton results. Since the enum is
-  --    circular, a "backwards" step is equivalent to a large forwards step,
-  --    but the enumeration ends at the "to" element earlier than expected.
-  --    Use 'pred' or 'cpred' explicitly with 'iterate' to go backwards.
   enumFromThenTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> Circular a -> [Circular a]
   enumFromThenTo from next to
     | from == to    = [to]
