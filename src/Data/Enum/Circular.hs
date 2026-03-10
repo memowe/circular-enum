@@ -66,9 +66,7 @@ instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
           goNext  = (!! step) . iterate succ
 
   enumFromTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
-  enumFromTo current target = current : if current == target
-    then []
-    else enumFromTo (succ current) target
+  enumFromTo start end = takeWhile (/= end) (enumFrom start) ++ [end]
 
   enumFromThenTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> Circular a -> [Circular a]
   enumFromThenTo lower higher target = let
