@@ -1,0 +1,97 @@
+name: Test and Publish API docs
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  HADDOCK_DIR: haddock-html
+  HADDOCK_BUILD_DIR: haddock_build
+  PAGES_DIR: gh-pages
+
+jobs:
+
+  build_test_doc:
+    name: Test & Docs (${{ matrix.ghc-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ghc-version: ['9.2', '9.4', '9.6', '9.8', '9.10', '9.12']
+        include:
+          - os: windows-latest
+            ghc-version: '9.6'
+          - os: macos-latest
+            ghc-version: '9.6'
+
+    steps:
+
+    - name: Checkout repository content
+      uses: actions/checkout@v4
+
+    - name: Set up GHC ${{ matrix.ghc-version }}
+      uses: haskell-actions/setup@v2
+      id: setup
+      with:
+        ghc-version: ${{ matrix.ghc-version }}
+
+    - name: Configure the build
+      # generates dist-newstyle/cache/plan.json
+      run: |
+        cabal configure --enable-tests --enable-benchmarks
+        cabal build all --dry-run 
+
+    - name: Configure cache
+      uses: actions/cache@v4
+      env:
+        key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-${{ steps.setup.outputs.cabal-version }}
+      with:
+        path: ${{ steps.setup.outputs.cabal-store }}
+        key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
+        restore-keys: ${{ env.key }}-plan-
+
+    - name: Install dependencies
+      run: cabal build --only-dependencies all
+
+    - name: Build project
+      run: cabal build all
+
+    - name: Run tests
+      run: cabal test --test-show-details=streaming all
+
+    - name: Generate haddock API docs
+      if: matrix.os == 'ubuntu-latest' && matrix.ghc-version == '9.6'
+      run: cabal haddock --builddir=$HADDOCK_BUILD_DIR --haddock-hyperlinked-source --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs'
+
+    - name: Find generated HTML
+      if: matrix.os == 'ubuntu-latest' && matrix.ghc-version == '9.6'
+      run: mv $(find $HADDOCK_BUILD_DIR -wholename '*doc/html/circular-enum' | head -n 1) $HADDOCK_DIR
+
+    - name: Store generated API docs
+      if: matrix.os == 'ubuntu-latest' && matrix.ghc-version == '9.6'
+      uses: actions/upload-artifact@v4
+      with:
+        name: Haddock API docs
+        path: ${{ env.HADDOCK_DIR }}
+
+    - name: Prepare API docs for pages deployment
+      if: matrix.os == 'ubuntu-latest' && matrix.ghc-version == '9.6'
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ${{ env.HADDOCK_DIR }}
+
+  deploy:
+    name: Deploy API docs
+    needs: build_test_doc
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
