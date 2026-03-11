@@ -41,48 +41,37 @@ cpred = unCircular . pred . Circular
 --    circular, a "backwards" step is equivalent to a large forwards step,
 --    but the enumeration ends at the "to" element earlier than expected.
 --    Use 'pred' or 'cpred' explicitly with 'iterate' to go backwards.
+--
+--    Also assumes that the underlying 'Enum' instance is well-behaved,
+--    i.e. @fromEnum minBound == 0@. This holds for all types using
+--    @deriving Enum@.
 
 newtype Circular a = Circular {unCircular :: a}
   deriving (Show, Eq)
 
 instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
-  succ :: Circular a -> Circular a
-  succ (Circular x) | x == maxBound = Circular minBound
-                    | otherwise     = Circular (succ x)
-
-  pred :: Circular a -> Circular a
-  pred (Circular x) | x == minBound = Circular maxBound
-                    | otherwise     = Circular (pred x)
 
   toEnum :: Int -> Circular a
   toEnum = Circular . toEnum . (`mod` len)
-    where len = fromEnum (maxBound :: a) - fromEnum (minBound :: a) + 1
+    where len = fromEnum (maxBound :: a) + 1
 
   fromEnum :: Circular a -> Int
   fromEnum = fromEnum . unCircular
 
-  enumFrom :: Circular a -> [Circular a]
-  enumFrom = enumFromThen <*> succ
+  enumFromTo :: Circular a -> Circular a -> [Circular a]
+  enumFromTo start end = map toEnum $ enumFromTo i (i + dist)
+    where i     = fromEnum start
+          j     = fromEnum end
+          dist  = (j - i) `mod` len
+          len   = fromEnum (maxBound :: a) + 1
 
-  enumFromThen :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
-  enumFromThen from next = iterate goNext from
-    where len     = fromEnum (maxBound :: a) - fromEnum (minBound :: a) + 1
-          step    = (fromEnum next - fromEnum from) `mod` len
-          goNext  = (!! step) . iterate succ
-
-  enumFromTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> [Circular a]
-  enumFromTo start end = takeWhile (/= end) (enumFrom start) ++ [end]
-
-  enumFromThenTo :: (Eq a, Enum a, Bounded a) => Circular a -> Circular a -> Circular a -> [Circular a]
+  enumFromThenTo :: Circular a -> Circular a -> Circular a -> [Circular a]
   enumFromThenTo from next to
-    | from == to    = [to]
-    | from == next  = repeat from
-    | otherwise     = from : go from (succ from)
-    where go x y
-            | y == goNext x &&  y == to = [to]
-            | y == goNext x             = y : go y (succ y)
-            |                   y == to = []
-            | otherwise                 = go x (succ y)
-          len     = fromEnum (maxBound :: a) - fromEnum (minBound :: a) + 1
-          step    = (fromEnum next - fromEnum from) `mod` len
-          goNext  = (!! step) . iterate succ
+    | step == 0 = repeat from
+    | otherwise = map toEnum $ enumFromThenTo i (i + step) (i + dist)
+    where i     = fromEnum from
+          j     = fromEnum next
+          k     = fromEnum to
+          step  = (j - i) `mod` len
+          dist  = (k - i) `mod` len
+          len   = fromEnum (maxBound :: a) + 1
