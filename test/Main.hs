@@ -38,6 +38,12 @@ main = hspec $ do
       it "Predecessors" $
         iterate cpred maxBound `startShouldBe` cycle (reverse allDirs)
 
+    describe "Reversibility" $ do
+      prop "csucc . cpred = id" $ \dir ->
+        (csucc . cpred) (dir :: Dir) `shouldBe` dir
+      prop "cpred . csucc = id" $ \dir ->
+        (cpred . csucc) (dir :: Dir) `shouldBe` dir
+
   describe "Circular newtype" $ do
 
     describe "Boundaries" $ do
@@ -88,6 +94,15 @@ main = hspec $ do
           enumFromTo (Circular S) (Circular E)
             `shouldBe` fmap Circular [S, W, N, E]
           -- forward iteration
+        it "enumFromTo: singleton" $
+          enumFromTo (Circular N) (Circular N)
+            `shouldBe` [Circular N]
+        it "enumFromThenTo: target exactly hit" $
+          enumFromThenTo (Circular N) (Circular S) (Circular S)
+            `shouldBe` fmap Circular [N, S]
+        it "enumFromThenTo: start = next -> infinite" $
+          enumFromThenTo (Circular N) (Circular N) (Circular S)
+            `startShouldBe` repeat (Circular N)
         it "enumFromThenTO: enumeration stepped wrapping" $
           enumFromThenTo (Circular N) (Circular S) (Circular E)
             `shouldBe` [Circular N]
