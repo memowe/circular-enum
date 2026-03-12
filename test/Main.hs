@@ -81,31 +81,31 @@ main = hspec $ do
     describe "enum[From][Then][To] circularity" $ do
 
       describe "Examples" $ do
-        it "Stepped Enum Iteration" $
+        it "enumFromThen: stepped Enum iteration" $
           enumFromThen (Circular N) (Circular S)
             `startShouldBe` cycle (fmap Circular [N, S])
-        it "enumeration Wrapping" $
+        it "enumFromTo: enumeration wrapping" $
           enumFromTo (Circular S) (Circular E)
             `shouldBe` fmap Circular [S, W, N, E]
           -- forward iteration
-        it "enumeration stepped wrapping" $
+        it "enumFromThenTO: enumeration stepped wrapping" $
           enumFromThenTo (Circular N) (Circular S) (Circular E)
             `shouldBe` [Circular N]
           -- consistent with [1,3..2]
-        it "enumFrom infinity" $
+        it "enumFrom: infinity" $
           enumFrom (Circular E)
             `startShouldBe` cycle (fmap Circular [E, S, W, N])
 
       describe "General properties" $ do
 
         describe "enumFromThen" $ do
-          prop "Correct start of enumFromThen: first" $ \cd cd' ->
+          prop "Correct start: first" $ \cd cd' ->
             head (enumFromThen cd cd') `shouldBe` (cd :: Circular Dir)
-          prop "Correct start of enumFromThen: second" $ \cd cd' ->
+          prop "Correct start: second" $ \cd cd' ->
             enumFromThen cd cd' !! 1 `shouldBe` (cd' :: Circular Dir)
           prop "Start = next -> infinite" $ \cd ->
             enumFromThen cd cd `startShouldBe` repeat (cd :: Circular Dir)
-          prop "Correct step size of enumFromThen" $ \cd n -> n /= 0 ==>
+          prop "Correct step size" $ \cd n -> n /= 0 ==>
             let cd' = toEnum (fromEnum (cd :: Circular Dir) + n)
                 ds  = enumFromThen cd cd'
                 shouldBeModLen = shouldBe `on` (`mod` length allDirs)
@@ -115,7 +115,7 @@ main = hspec $ do
                   in  (fromEnum cd2 - fromEnum cd1) `shouldBeModLen` n
 
         describe "enumFrom: enumFromThen with succ" $ do
-          prop "Same list starts" $ \cd ->
+          prop "Same infinite list start" $ \cd ->
             enumFrom cd
               `startShouldBe` enumFromThen (cd :: Circular Dir) (succ cd)
 
@@ -125,7 +125,7 @@ main = hspec $ do
           prop "Start = next -> infinite" $ \cd target -> cd /= target ==>
             enumFromThenTo cd cd target
               `startShouldBe` repeat (cd :: Circular Dir)
-          prop "Prefix of enumFromThen" $ \cd cd' target -> cd /= cd' ==>
+          prop "Prefix" $ \cd cd' target -> cd /= cd' ==>
             enumFromThenTo cd cd' target
               `isPrefixOf` enumFromThen cd (cd' :: Circular Dir)
 
