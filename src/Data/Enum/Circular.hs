@@ -20,6 +20,10 @@ to be @South@. But in this case, one would like to have some kind of
 @succ@ with @succ West = North@ again. With 'Eq' and 'Bounded' instances,
 the functions defined in this module act like circular versions of 'succ'
 and 'pred'.
+
+Note: this module is designed for small, finite enum types created with
+@deriving Enum@. It is not suitable for types where
+@fromEnum maxBound + 1@ overflows 'Int', such as 'Int' or 'Word' itself.
 -}
 
 module Data.Enum.Circular (csucc, cpred, Circular(..)) where
@@ -43,8 +47,9 @@ cpred = unCircular . pred . Circular
 --    Use 'pred' or 'cpred' explicitly with 'iterate' to go backwards.
 --
 --    Also assumes that the underlying 'Enum' instance is well-behaved,
---    i.e. @fromEnum minBound == 0@. This holds for all types using
---    @deriving Enum@.
+--    i.e. @fromEnum minBound == 0@ and @fromEnum maxBound + 1@ does not
+--    overflow 'Int'. Both hold for all types using @deriving Enum@ with a
+--    small number of constructors, but /not/ for 'Int', 'Word', or similar.
 
 newtype Circular a = Circular {unCircular :: a}
   deriving (Show, Eq)

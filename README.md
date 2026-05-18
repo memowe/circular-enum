@@ -27,6 +27,10 @@ show $ take 6 (iterate csucc N)
 
 `csucc` and `cpred` are compatible with `succ` and `pred`, but they behave circular on the type boundaries. Requires `Eq`, `Enum` and `Bounded` instances.
 
+> **Note:** Designed for small, finite enum types with `deriving Enum`.
+> Not suitable for `Int`, `Word`, or other types with very large ranges,
+> as the internal arithmetic overflows.
+
 You can also use the `Circular` newtype:
 
 ```haskell
