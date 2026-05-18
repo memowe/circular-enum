@@ -1,6 +1,6 @@
 cabal-version:    3.0
 name:             circular-enum
-version:          0.1.0.0
+version:          0.2.0.0
 synopsis:         Make bounded enum types circular
 description:      Circular successor & predecessor for bounded enum types
 homepage:         https://github.com/memowe/circular-enum

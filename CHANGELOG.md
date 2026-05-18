@@ -1,6 +1,6 @@
 # Revision history for circular-enum
 
-## 0.2.0.0 -- TODO
+## 0.2.0.0 -- 2026-05-18
 
 * Add the Circular newtype wrapper (VegOwOtenks)
 
