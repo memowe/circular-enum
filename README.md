@@ -2,15 +2,12 @@
 
 **Circular successor & predecessor for bounded enum types**
 
-[![Build and test][test-badge]][test]
-[![Publish API docs][haddock-badge]][haddock]
-[![API docs][api-docs-badge]][api-docs]  
+[![Build and test][ci-badge]][ci]
+[![API docs][api-docs-badge]][api-docs]
 [![Hackage: circular-enum][hackage-badge]][hackage]
 
-[test-badge]: https://github.com/memowe/circular-enum/actions/workflows/test.yml/badge.svg
-[test]: https://github.com/memowe/circular-enum/actions/workflows/test.yml
-[haddock-badge]: https://github.com/memowe/circular-enum/actions/workflows/haddock-pages.yml/badge.svg
-[haddock]: https://github.com/memowe/circular-enum/actions/workflows/haddock-pages.yml
+[ci-badge]: https://github.com/memowe/circular-enum/actions/workflows/haskell-ci.yml/badge.svg
+[ci]: https://github.com/memowe/circular-enum/actions/workflows/haskell-ci.yml
 [api-docs-badge]: https://img.shields.io/badge/API-docs-blue?style=flat&logo=haskell&logoColor=lightgray
 [api-docs]: https://mirko.westermeier.de/circular-enum/Data-Enum-Circular.html
 [hackage-badge]: https://img.shields.io/badge/Hackage-circular--enum_v0.1.0.0-8a80a8?style=flat&logo=haskell&logoColor=lightgray
