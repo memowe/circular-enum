@@ -16,7 +16,7 @@ extra-doc-files:  CHANGELOG.md
 source-repository head
     type:       git
     branch:     main
-    location:   git://github.com/memowe/circular-enum.git
+    location:   https://github.com/memowe/circular-enum.git
 
 common warnings
     ghc-options: -Wall
