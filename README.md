@@ -17,7 +17,7 @@
 [hackage]: https://hackage.haskell.org/package/circular-enum
 
 ```haskell
-import Data.Enum.Circular (csucc, cpred)
+import Data.Enum.Circular
 
 data Direction = N | E | S | W deriving (Show, Eq, Enum, Bounded)
 
@@ -27,11 +27,24 @@ show $ take 6 (iterate csucc N)
 
 `csucc` and `cpred` are compatible with `succ` and `pred`, but they behave circular on the type boundaries. Requires `Eq`, `Enum` and `Bounded` instances.
 
+> **Note:** Designed for small, finite enum types with `deriving Enum`.
+> Not suitable for `Int`, `Word`, or other types with very large ranges,
+> as the internal arithmetic overflows.
+
+You can also use the `Circular` newtype:
+
+```haskell
+type CDirection = Circular Direction
+
+show $ take 6 (iterate succ (Circular N))
+```
+
 ## Contributors
 
 [![Contributor Covenant 2.0][coc-img]][coc]
 
 - Mirko Westermeier ([@memowe][memowe-gh])
+- VegOwOtenks ([@Hyalunar][Hyalunar-gh])
 
 ## Author and License
 
@@ -42,3 +55,4 @@ Released under the MIT license. See [LICENSE](LICENSE) for details.
 [coc]: CODE_OF_CONDUCT.md
 [coc-img]: https://img.shields.io/badge/Code%20of%20Conduct-Contributor%20Covenant%202.0-8f761b.svg?style=flat&logo=adguard&logoColor=lightgray
 [memowe-gh]: https://github.com/memowe
+[Hyalunar-gh]: https://github.com/Hyalunar

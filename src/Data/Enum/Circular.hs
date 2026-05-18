@@ -20,16 +20,63 @@ to be @South@. But in this case, one would like to have some kind of
 @succ@ with @succ West = North@ again. With 'Eq' and 'Bounded' instances,
 the functions defined in this module act like circular versions of 'succ'
 and 'pred'.
+
+Note: this module is designed for small, finite enum types created with
+@deriving Enum@. It is not suitable for types where
+@fromEnum maxBound + 1@ overflows 'Int', such as 'Int' or 'Word' itself.
 -}
 
-module Data.Enum.Circular (csucc, cpred) where
+module Data.Enum.Circular (csucc, cpred, Circular(..)) where
 
 -- | Circular version of 'succ'
 csucc :: (Eq a, Enum a, Bounded a) => a -> a
-csucc x | x == maxBound = minBound
-        | otherwise     = succ x
+csucc = unCircular . succ . Circular
 
 -- | Circular version of 'pred'
 cpred :: (Eq a, Enum a, Bounded a) => a -> a
-cpred x | x == minBound = maxBound
-        | otherwise     = pred x
+cpred = unCircular . pred . Circular
+
+
+--  | Type Alias you can use to express your intent and avoid 'Enum'
+--    functions from biting you.
+--
+--    Beware: unlike regular 'Enum' types, backwards enumeration via
+--    @[West, South ..]@ leads to singleton results. Since the enum is
+--    circular, a "backwards" step is equivalent to a large forwards step,
+--    but the enumeration ends at the "to" element earlier than expected.
+--    Use 'pred' or 'cpred' explicitly with 'iterate' to go backwards.
+--
+--    Also assumes that the underlying 'Enum' instance is well-behaved,
+--    i.e. @fromEnum minBound == 0@ and @fromEnum maxBound + 1@ does not
+--    overflow 'Int'. Both hold for all types using @deriving Enum@ with a
+--    small number of constructors, but /not/ for 'Int', 'Word', or similar.
+
+newtype Circular a = Circular {unCircular :: a}
+  deriving (Show, Eq)
+
+instance (Enum a, Bounded a) => Enum (Circular a) where
+
+  toEnum :: Int -> Circular a
+  toEnum = Circular . toEnum . (`mod` len)
+    where len = fromEnum (maxBound :: a) + 1
+
+  fromEnum :: Circular a -> Int
+  fromEnum = fromEnum . unCircular
+
+  enumFromTo :: Circular a -> Circular a -> [Circular a]
+  enumFromTo start end = map toEnum $ enumFromTo i (i + dist)
+    where i     = fromEnum start
+          j     = fromEnum end
+          dist  = (j - i) `mod` len
+          len   = fromEnum (maxBound :: a) + 1
+
+  enumFromThenTo :: Circular a -> Circular a -> Circular a -> [Circular a]
+  enumFromThenTo from next to
+    | step == 0 = repeat from
+    | otherwise = map toEnum $ enumFromThenTo i (i + step) (i + dist)
+    where i     = fromEnum from
+          j     = fromEnum next
+          k     = fromEnum to
+          step  = (j - i) `mod` len
+          dist  = (k - i) `mod` len
+          len   = fromEnum (maxBound :: a) + 1
