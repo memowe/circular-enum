@@ -54,7 +54,7 @@ cpred = unCircular . pred . Circular
 newtype Circular a = Circular {unCircular :: a}
   deriving (Show, Eq)
 
-instance (Eq a, Enum a, Bounded a) => Enum (Circular a) where
+instance (Enum a, Bounded a) => Enum (Circular a) where
 
   toEnum :: Int -> Circular a
   toEnum = Circular . toEnum . (`mod` len)
